@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INTELIJEN NUSANTARA · DASHBOARD GLOBAL</title>
+  <!-- Tailwind + Font Awesome + Animate.css -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    /* GLASSMORPHISM + DARK MODE PREMIUM */
+    body {
+      background: #0a0c10;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    .glass {
+      background: rgba(20, 30, 40, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .glass-card {
+      background: rgba(18, 25, 32, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(66, 153, 225, 0.15);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card:hover {
+      border-color: rgba(66, 153, 225, 0.5);
+      box-shadow: 0 20px 30px -10px rgba(0, 150, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #1a2630 25%, #2a3745 50%, #1a2630 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+    }
+    @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    
+    /* BADGE */
+    .badge-papua { background: #b91c1c; } 
+    .badge-nasional { background: #1e40af; } 
+    .badge-global { background: #2d3748; }
+    
+    /* MODAL CUSTOM */
+    .modal-overlay {
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(5px);
+    }
+    .analysis-tab {
+      transition: all 0.2s;
+    }
+    
+    /* FIELD PEKERJAAN SELECT */
+    .field-select {
+      background: #1e2a36;
+      border: 1px solid #3a4a5a;
+      color: white;
+      border-radius: 9999px;
+      padding: 0.5rem 1.5rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .field-select:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    
+    /* HIDE FOOTER TOTAL */
+    footer, .footer, [class*="footer"] {
+      display: none !important;
+    }
+    
+    /* CUSTOM SCROLL */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #1a2630; }
+    ::-webkit-scrollbar-thumb { background: #3b4b5e; border-radius: 10px; }
+  </style>
+</head>
+<body class="text-gray-200">
+
+  <!-- ========== HEADER PREMIUM ========== -->
+  <header class="glass sticky top-0 z-50 border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-satellite-dish text-2xl text-blue-400"></i>
+        <h1 class="text-xl font-bold tracking-tight">
+          <span class="text-white">INTELIJEN</span>
+          <span class="text-blue-400">NUSANTARA</span>
+        </h1>
+        <span class="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full border border-green-500/30 animate-pulse">
+          <i class="fas fa-circle text-[8px] mr-1 text-green-400"></i> LIVE INTELLIGENCE
+        </span>
+      </div>
+      <div class="flex items-center gap-4 text-sm">
+        <div class="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full">
+          <i class="far fa-clock text-blue-300"></i>
+          <span id="liveTime" class="font-mono"></span>
+        </div>
+        <div class="flex gap-1">
+          <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+          <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse animation-delay-200"></span>
+          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse animation-delay-400"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAV TAB DENGAN INDIKATOR REGION -->
+    <div class="max-w-7xl mx-auto px-6 flex gap-1">
+      <button id="tab-papua" class="tab-btn flex-1 py-3 font-medium text-sm border-b-2 border-blue-500 text-blue-400 bg-gradient-to-t from-blue-500/5 to-transparent" data-region="papua">
+        <i class="fas fa-map-pin mr-2"></i>PAPUA · 12 KABUPATEN
+      </button>
+      <button id="tab-nasional" class="tab-btn flex-1 py-3 font-medium text-sm text-gray-400 border-b-2 border-transparent hover:text-white" data-region="nasional">
+        <i class="fas fa-flag mr-2"></i>NASIONAL · 18 MEDIA
+      </button>
+      <button id="tab-global" class="tab-btn flex-1 py-3 font-medium text-sm text-gray-400 border-b-2 border-transparent hover:text-white" data-region="global">
+        <i class="fas fa-globe-americas mr-2"></i>GLOBAL · 12 CHANNEL
+      </button>
+    </div>
+  </header>
+
+  <!-- ========== MAIN DASHBOARD ========== -->
+  <main class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- SKELETON LOADING -->
+    <div id="skeleton" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div class="skeleton h-72 rounded-2xl"></div><div class="skeleton h-72 rounded-2xl"></div><div class="skeleton h-72 rounded-2xl"></div>
+      <div class="skeleton h-72 rounded-2xl"></div><div class="skeleton h-72 rounded-2xl"></div><div class="skeleton h-72 rounded-2xl"></div>
+      <div class="skeleton h-72 rounded-2xl"></div><div class="skeleton h-72 rounded-2xl"></div><div class="skeleton h-72 rounded-2xl"></div>
+    </div>
+
+    <!-- GRID BERITA -->
+    <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 hidden"></div>
+
+    <!-- ERROR MESSAGE -->
+    <div id="error-box" class="text-center py-24 hidden">
+      <i class="fas fa-cloud-arrow-down text-6xl text-gray-600 mb-4"></i>
+      <p class="text-gray-400 text-lg mb-4">Gagal mengambil data intelijen</p>
+      <button id="retryBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full text-sm transition">
+        <i class="fas fa-rotate mr-2"></i>INISIALISASI ULANG
+      </button>
+    </div>
+  </main>
+
+  <!-- ========== MODAL ANALISIS (CUSTOM PER BIDANG) ========== -->
+  <div id="analysisModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden modal-overlay">
+    <div class="glass-card w-11/12 max-w-3xl rounded-2xl p-6 max-h-[90vh] overflow-y-auto border border-blue-500/30 animate__animated animate__fadeInUp animate__faster">
+      
+      <!-- HEADER MODAL -->
+      <div class="flex justify-between items-center mb-5 pb-3 border-b border-white/10">
+        <h2 class="text-xl font-bold flex items-center gap-2">
+          <i class="fas fa-microchip text-blue-400"></i>
+          <span id="modalNewsTitle">ANALISIS INTELIJEN</span>
+        </h2>
+        <button onclick="closeModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+      </div>
+
+      <!-- FIELD BIDANG PEKERJAAN -->
+      <div class="mb-6">
+        <label class="block text-xs uppercase tracking-wider text-gray-400 mb-2">ANALISIS UNTUK</label>
+        <select id="fieldSelector" class="field-select w-full md:w-auto" onchange="updateAnalysisByField()">
+          <option value="keamanan">🛡️ Pihak Keamanan (TNI/Polri)</option>
+          <option value="analis" selected>📊 Analis Intelijen</option>
+          <option value="mahasiswa">🎓 Mahasiswa/Pelajar</option>
+          <option value="jurnalis">📰 Jurnalis</option>
+          <option value="investor">💰 Investor/Bisnis</option>
+          <option value="umum">👥 Masyarakat Umum</option>
+        </select>
+        <p class="text-xs text-gray-500 mt-2 italic">Analisis, kesimpulan, saran & prediksi akan menyesuaikan bidang di atas.</p>
+      </div>
+
+      <!-- TAB ANALISIS (4 KOLOM) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- ANALISIS -->
+        <div class="bg-black/30 p-4 rounded-xl border border-white/5">
+          <div class="flex items-center gap-2 text-blue-400 mb-2">
+            <i class="fas fa-search"></i>
+            <h3 class="font-semibold">ANALISIS</h3>
+          </div>
+          <p id="analysisText" class="text-sm text-gray-300 leading-relaxed">Memuat analisis...</p>
+        </div>
+        <!-- KESIMPULAN -->
+        <div class="bg-black/30 p-4 rounded-xl border border-white/5">
+          <div class="flex items-center gap-2 text-yellow-400 mb-2">
+            <i class="fas fa-clipboard-check"></i>
+            <h3 class="font-semibold">KESIMPULAN</h3>
+          </div>
+          <p id="conclusionText" class="text-sm text-gray-300 leading-relaxed">Memuat kesimpulan...</p>
+        </div>
+        <!-- SARAN -->
+        <div class="bg-black/30 p-4 rounded-xl border border-white/5">
+          <div class="flex items-center gap-2 text-green-400 mb-2">
+            <i class="fas fa-lightbulb"></i>
+            <h3 class="font-semibold">SARAN</h3>
+          </div>
+          <p id="adviceText" class="text-sm text-gray-300 leading-relaxed">Memuat saran...</p>
+        </div>
+        <!-- PREDIKSI -->
+        <div class="bg-black/30 p-4 rounded-xl border border-white/5">
+          <div class="flex items-center gap-2 text-purple-400 mb-2">
+            <i class="fas fa-chart-line"></i>
+            <h3 class="font-semibold">PREDIKSI</h3>
+          </div>
+          <p id="predictionText" class="text-sm text-gray-300 leading-relaxed">Memuat prediksi...</p>
+        </div>
+      </div>
+
+      <!-- FOOTER MODAL -->
+      <div class="mt-6 flex justify-end">
+        <button onclick="closeModal()" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-full text-sm transition">TUTUP</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      "use strict";
+
+      // ========== KONFIGURASI ==========
+      const NEWSAPI_KEY = '81a37ea540a84f8185ddfd37e10fcc0f'; // <-- GANTI
+      const PROXIES = [
+        'https://api.rss2json.com/v1/api.json?rss_url=',
+        'https://rss2json.com/api.json?rss_url=',
+        'https://feed2json.org/convert?url=',
+      ];
+
+      // SUPER LENGKAP RSS FEEDS (PAPUA·NASIONAL·GLOBAL)
+      const RSS_FEEDS = {
+        papua: [
+          "https://papua.antaranews.com/rss/terkini.xml",
+          "https://papua.antaranews.com/rss/papua.xml",
+          "https://papua.antaranews.com/rss/papua-barat.xml",
+          "https://papua.antaranews.com/rss/papua-pegunungan.xml",
+          "https://papua.antaranews.com/rss/papua-selatan.xml",
+          "https://papua.antaranews.com/rss/papua-tengah.xml",
+          "https://www.pasificpos.com/feed",
+          "https://kabarpapua.co/feed",
+          "https://tabloidjubi.com/feed",
+          "https://papuatimes.co.id/feed",
+          "https://kabartimur.com/feed",
+          "https://fajarpapua.com/feed",
+          "https://rri.co.id/jayapura/berita/rss",
+          "https://www.papuabaratnews.id/feed",
+        ],
+        nasional: [
+          "https://www.antaranews.com/rss/terkini.xml",
+          "https://rss.detik.com/index.php/detikcom_nasional",
+          "https://www.kompas.com/rss/nasional",
+          "https://www.tribunnews.com/rss",
+          "https://www.liputan6.com/feed",
+          "https://www.republika.co.id/rss",
+          "https://nasional.sindonews.com/feed",
+          "https://www.okezone.com/rss",
+          "https://poskota.co.id/feed",
+          "https://jogja.tribunnews.com/rss",
+          "https://www.jpnn.com/feed",
+          "https://beritasatu.com/rss",
+          "https://www.metrotvnews.com/rss/news",
+          "https://www.viva.co.id/rss",
+          "https://www.tempo.co/rss/terkini",
+          "https://www.cnnindonesia.com/rss",
+          "https://www.idntimes.com/rss",
+          "https://www.suara.com/rss/news"
+        ],
+        global: [
+          "https://feeds.bbci.co.uk/news/world/rss.xml",
+          "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+          "https://www.aljazeera.com/xml/rss/all.xml",
+          "https://feeds.foxnews.com/foxnews/world",
+          "https://www.theguardian.com/world/rss",
+          "https://rss.cnn.com/rss/edition_world.rss",
+          "https://feeds.skynews.com/feeds/rss/world.xml",
+          "https://www.dw.com/en/top-stories/rss",
+          "https://www.reutersagency.com/feed/?best-topics=business-finance",
+          "https://www.economist.com/feeds/print-sections/77/business.xml"
+        ]
+      };
+
+      // Cache + deduplikasi
+      let cache = { papua: null, nasional: null, global: null };
+      let cacheTime = { papua: 0, nasional: 0, global: 0 };
+      const CACHE_TTL = 10 * 60 * 1000;
+      let seenTitles = new Set();
+
+      // ========== HELPER ==========
+      function updateClock() {
+        document.getElementById('liveTime').innerText = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second:'2-digit' });
+      }
+      setInterval(updateClock, 1000);
+      updateClock();
+
+      function timeAgo(pubDate) {
+        if (!pubDate) return 'baru';
+        let d = new Date(pubDate);
+        if (isNaN(d)) return 'baru';
+        let seconds = Math.floor((new Date() - d) / 1000);
+        if (seconds < 60) return 'baru saja';
+        let minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return minutes + ' menit lalu';
+        let hours = Math.floor(minutes / 60);
+        if (hours < 24) return hours + ' jam lalu';
+        let days = Math.floor(hours / 24);
+        return days + ' hari lalu';
+      }
+
+      // REWRITE judul & isi
+      function rewriteArticle(title, description) {
+        let newTitle = title;
+        if (title.length > 60) newTitle = title.substring(0, 55) + '…';
+        if (Math.random() > 0.65) newTitle = '🔴 BREAKING · ' + newTitle;
+
+        let cleanDesc = description.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+        let sentences = cleanDesc.split(/[.!?]+/).filter(s => s.trim().length > 15);
+        let summary = sentences.slice(0, 2).join('. ') + '.';
+        if (summary.length < 30) summary = cleanDesc.substring(0, 150) + '…';
+        summary = summary.replace(/(Oleh|By|Author|Penulis)[:\s]+[A-Z][a-z]+(\s[A-Z][a-z]+)*/gi, 'Redaksi Intelijen');
+
+        return { title: newTitle, summary };
+      }
+
+      // FETCH dengan proxy fallback
+      async function fetchWithProxy(feedUrl) {
+        for (let proxy of PROXIES) {
+          try {
+            const url = proxy + encodeURIComponent(feedUrl);
+            const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+            if (!res.ok) continue;
+            const data = await res.json();
+            if (data && data.status === 'ok') return data;
+          } catch (e) { console.warn('Proxy gagal:', e.message); }
+        }
+        return null;
+      }
+
+      // AMBIL BERITA
+      async function fetchRegionNews(region) {
+        if (cache[region] && (Date.now() - cacheTime[region] < CACHE_TTL)) return cache[region];
+
+        const feedUrls = RSS_FEEDS[region];
+        let allArticles = [];
+        seenTitles.clear();
+
+        for (let i = 0; i < feedUrls.length; i += 4) {
+          const batch = feedUrls.slice(i, i + 4);
+          const promises = batch.map(async (url) => {
+            const data = await fetchWithProxy(url);
+            if (!data || !data.items) return [];
+
+            return data.items.slice(0, 5).map(item => {
+              const rewritten = rewriteArticle(item.title, item.description || item.content || '');
+              const key = (item.title || '').slice(0, 50).toLowerCase();
+              if (seenTitles.has(key)) return null;
+              seenTitles.add(key);
+
+              return {
+                title: rewritten.title,
+                summary: rewritten.summary,
+                image: item.thumbnail || item.enclosure?.link || `https://placehold.co/600x400/1e2a36/white?text=INTEL`,
+                link: item.link,
+                source: data.feed?.title || new URL(url).hostname.replace('www.', '').split('.')[0],
+                pubDate: item.pubDate,
+                region: region
+              };
+            }).filter(a => a !== null);
+          });
+
+          const results = await Promise.allSettled(promises);
+          results.forEach(r => { if (r.status === 'fulfilled') allArticles.push(...r.value); });
+        }
+
+        const shuffled = allArticles.sort(() => 0.5 - Math.random());
+        const final = shuffled.slice(0, 18);
+        cache[region] = final;
+        cacheTime[region] = Date.now();
+        return final;
+      }
+
+      // ========== GENERATE ANALISIS BERDASARKAN BIDANG ==========
+      function generateAnalysisByField(berita, field) {
+        const judul = berita.title || '';
+        const isi = berita.summary || '';
+        const region = berita.region || 'global';
+        
+        // Template analisis dasar
+        let analysis = '';
+        let conclusion = '';
+        let advice = '';
+        let prediction = '';
+
+        if (field === 'keamanan') {
+          analysis = `[ANALISIS KEAMANAN] Berdasarkan berita "${judul}", terdeteksi potensi eskalasi di wilayah ${region}. Perlu peningkatan patroli dan koordinasi dengan aparat setempat. Ancaman level: SEDANG.`;
+          conclusion = `Kesimpulan: Stabilitas keamanan relatif terkendali namun tetap waspada terhadap provokasi.`;
+          advice = `Saran: Siagakan personel di titik-titik rawan, tingkatkan intelijen lapangan.`;
+          prediction = `Prediksi 3-7 hari ke depan: Potensi gangguan keamanan jika tidak ada langkah preventif.`;
+        } else if (field === 'analis') {
+          analysis = `[ANALISIS INTELIJEN] Berita "${judul}" mengindikasikan pola pergerakan aktor tertentu. Korelasi dengan data sebelumnya menunjukkan adanya peningkatan frekuensi.`;
+          conclusion = `Kesimpulan: Terdapat anomali yang perlu didalami lebih lanjut.`;
+          advice = `Saran: Lakukan profiling terhadap entitas yang disebut, verifikasi silang dengan sumber lain.`;
+          prediction = `Prediksi: Dalam 2 minggu ke depan, kemungkinan muncul pengumuman resmi terkait isu ini.`;
+        } else if (field === 'mahasiswa') {
+          analysis = `[ANALISIS AKADEMIS] Dari perspektif sosial-politik, berita "${judul}" mencerminkan dinamika struktural di tingkat ${region}. Relevan dengan kajian konflik dan resolusi.`;
+          conclusion = `Kesimpulan: Fenomena ini bisa dijadikan studi kasus untuk memahami kompleksitas daerah.`;
+          advice = `Saran: Diskusikan dalam forum kajian, hubungkan dengan teori-teori yang dipelajari.`;
+          prediction = `Prediksi: Akan ada respon kebijakan dari pemerintah dalam waktu dekat.`;
+        } else if (field === 'jurnalis') {
+          analysis = `[ANALISIS JURNALISTIK] Angle berita ini kuat, namun perlu verifikasi tambahan dari sumber primer. Framing yang muncul cenderung [netral/positif/negatif].`;
+          conclusion = `Kesimpulan: Informasi cukup layak muat dengan catatan konfirmasi ulang.`;
+          advice = `Saran: Kejar wawancara dengan narasumber kunci, gali data pendukung.`;
+          prediction = `Prediksi: Isu ini akan menjadi trending topic 1-2 hari ke depan.`;
+        } else if (field === 'investor') {
+          analysis = `[ANALISIS BISNIS] Berita "${judul}" berpotensi mempengaruhi sektor [energi/pertanian/teknologi] di kawasan ${region}. Volatilitas pasar perlu diantisipasi.`;
+          conclusion = `Kesimpulan: Dampak jangka pendek masih terbatas, tapi jangka menengah perlu dicermati.`;
+          advice = `Saran: Diversifikasi portofolio, pertimbangkan hedging untuk aset berisiko.`;
+          prediction = `Prediksi: Indeks sektor terkait akan bergerak fluktuatif 3-5 hari ke depan.`;
+        } else {
+          analysis = `[ANALISIS UMUM] Berita "${judul}" memberikan gambaran tentang situasi terkini di ${region}. Informasi ini penting untuk kesadaran publik.`;
+          conclusion = `Kesimpulan: Masyarakat diimbau tetap tenang dan tidak terprovokasi.`;
+          advice = `Saran: Ikuti perkembangan dari sumber resmi, jangan mudah percaya hoaks.`;
+          prediction = `Prediksi: Situasi akan membaik dalam waktu dekat.`;
+        }
+
+        return { analysis, conclusion, advice, prediction };
+      }
+
+      // ========== RENDER NEWS ==========
+      function renderNews(articles) {
+        const grid = document.getElementById('news-grid');
+        const skeleton = document.getElementById('skeleton');
+        const errorBox = document.getElementById('error-box');
+
+        if (!articles || articles.length === 0) {
+          skeleton.classList.add('hidden');
+          grid.classList.add('hidden');
+          errorBox.classList.remove('hidden');
+          return;
+        }
+
+        let html = '';
+        articles.forEach((a, idx) => {
+          let badgeClass = a.region === 'papua' ? 'badge-papua' : (a.region === 'nasional' ? 'badge-nasional' : 'badge-global');
+          html += `
+            <div class="glass-card rounded-2xl overflow-hidden flex flex-col">
+              <img src="${a.image}" alt="news" class="w-full h-44 object-cover" loading="lazy" onerror="this.src='https://placehold.co/600x400/1e2a36/white?text=INTEL'">
+              <div class="p-5 flex flex-col flex-1">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="${badgeClass} text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">${a.region}</span>
+                  <span class="text-gray-400 text-xs"><i class="far fa-clock mr-1"></i>${timeAgo(a.pubDate)}</span>
+                </div>
+                <h3 class="font-bold text-base leading-snug mb-2 line-clamp-2 text-white">${a.title}</h3>
+                <p class="text-gray-300 text-xs leading-relaxed mb-3 line-clamp-3">${a.summary}</p>
+                <div class="mt-auto flex items-center justify-between text-xs border-t border-white/10 pt-3">
+                  <span class="text-gray-400"><i class="fas fa-source mr-1"></i>${a.source}</span>
+                  <div class="flex gap-2">
+                    <button onclick='openAnalysis(${JSON.stringify(a).replace(/'/g, "\\'")})' class="bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 px-3 py-1.5 rounded-full text-[11px] font-medium transition flex items-center gap-1">
+                      <i class="fas fa-microchip"></i> ANALISIS
+                    </button>
+                    <a href="${a.link}" target="_blank" class="bg-white/5 hover:bg-white/10 text-white px-3 py-1.5 rounded-full text-[11px] font-medium transition flex items-center gap-1">
+                      <i class="fas fa-arrow-up-right-from-square"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+
+        grid.innerHTML = html;
+        skeleton.classList.add('hidden');
+        grid.classList.remove('hidden');
+        errorBox.classList.add('hidden');
+      }
+
+      // ========== MODAL ANALISIS ==========
+      let currentNews = null;
+
+      window.openAnalysis = function(news) {
+        currentNews = news;
+        document.getElementById('modalNewsTitle').innerText = news.title.substring(0, 60) + '…';
+        updateAnalysisByField();
+        document.getElementById('analysisModal').classList.remove('hidden');
+      }
+
+      window.closeModal = function() {
+        document.getElementById('analysisModal').classList.add('hidden');
+      }
+
+      window.updateAnalysisByField = function() {
+        if (!currentNews) return;
+        const field = document.getElementById('fieldSelector').value;
+        const res = generateAnalysisByField(currentNews, field);
+        document.getElementById('analysisText').innerText = res.analysis;
+        document.getElementById('conclusionText').innerText = res.conclusion;
+        document.getElementById('adviceText').innerText = res.advice;
+        document.getElementById('predictionText').innerText = res.prediction;
+      }
+
+      // ========== LOAD REGION ==========
+      async function loadRegion(region) {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          btn.classList.remove('border-blue-500', 'text-blue-400');
+          btn.classList.add('border-transparent', 'text-gray-400');
+        });
+        document.getElementById(`tab-${region}`).classList.remove('border-transparent', 'text-gray-400');
+        document.getElementById(`tab-${region}`).classList.add('border-blue-500', 'text-blue-400');
+
+        document.getElementById('skeleton').classList.remove('hidden');
+        document.getElementById('news-grid').classList.add('hidden');
+        document.getElementById('error-box').classList.add('hidden');
+
+        try {
+          const articles = await fetchRegionNews(region);
+          renderNews(articles);
+        } catch (err) {
+          console.error(err);
+          document.getElementById('skeleton').classList.add('hidden');
+          document.getElementById('error-box').classList.remove('hidden');
+        }
+      }
+
+      // ========== EVENT LISTENER ==========
+      document.getElementById('tab-papua').addEventListener('click', () => loadRegion('papua'));
+      document.getElementById('tab-nasional').addEventListener('click', () => loadRegion('nasional'));
+      document.getElementById('tab-global').addEventListener('click', () => loadRegion('global'));
+      document.getElementById('retryBtn').addEventListener('click', () => {
+        let active = document.querySelector('.tab-btn.border-blue-500')?.dataset.region || 'papua';
+        loadRegion(active);
+      });
+
+      // START
+      loadRegion('papua');
+    })();
+  </script>
+</body>
+</html>
